@@ -35,7 +35,8 @@ class PersonSegmentationRos:
         self.topic_name = topic_name
     
     def infer(self, frame: np.ndarray):
-        input_data = self.preprocess(input_data, dtype=self.dtype)
+        frame = np.asarray(cv2.resize(frame, (self.input_width, self.input_height)))
+        input_data = self.preprocess(frame, dtype=self.dtype)
         outputs = self.session.run([self.output_name], {self.input_name: input_data})[0]
         predicted_mask = np.where(outputs < 0.5, 0, 255).astype(np.uint8)
         return predicted_mask
