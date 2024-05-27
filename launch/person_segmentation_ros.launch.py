@@ -19,6 +19,7 @@ from launch.substitutions import LaunchConfiguration
 from launch.substitutions import PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
+import yaml
 
 
 def launch_setup(context, *args, **kwargs):
@@ -28,13 +29,24 @@ def launch_setup(context, *args, **kwargs):
             [FindPackageShare('person_segmentation_ros'), 'config', 'person_segmentation_ros.param.yaml']
         ).perform(context)
 
+    with open(param_path, 'r', encoding="utf-8") as file:
+        param_yaml = yaml.safe_load(file)
+
+    onnx_model = LaunchConfiguration('onnx_model_path').perform(context)
+    if not onnx_model:
+        onnx_model = PathJoinSubstitution(
+            [FindPackageShare('person_segmentation_ros'), 'resources', 'model_fp32.onnx']
+        ).perform(context)
+
+    param_yaml['onnx_model_path'] = onnx_model
+
+    params = [{key: str(value)} for key, value in param_yaml.items()]
+
     person_segmentation_ros_node = Node(
         package='person_segmentation_ros',
         executable='person_segmentation_ros_node.py',
         name='person_segmentation_ros_node',
-        parameters=[
-            param_path
-        ],
+        parameters=params,
         output='screen',
         arguments=['--ros-args', '--log-level', 'info', '--enable-stdout-logs'],
         emulate_tty=True
@@ -54,6 +66,7 @@ def generate_launch_description():
         )
 
     add_launch_arg('person_segmentation_ros_param_file', '')
+    add_launch_arg('onnx_model_path', '')
 
     return LaunchDescription([
         *declared_arguments,

@@ -1,3 +1,7 @@
-/**:
-  ros__parameters:
-    param_name: 789
+distance_m: 3
+input_image_height: 320
+input_image_width: 320
+model_dtype: "float32"
+mqtt_topic_name: "human-detected"
+image_topic_name: '/oak/color'
+stereo_topic_name: '/oak/stereo'

@@ -1,0 +1,6 @@
+numpy
+pillow
+onnx
+onnxruntime
+paho-mqtt
+opencv-python

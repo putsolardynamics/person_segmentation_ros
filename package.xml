@@ -11,7 +11,11 @@
 
   <build_depend>ament_cmake_python</build_depend>
 
+  <depend>sensor_msgs</depend>
+  <depend>cv_bridge</depend>
+
   <exec_depend>launch_ros</exec_depend>
+  <exec_depend>ros2launch</exec_depend>
   <exec_depend>rclpy</exec_depend>
 
   <test_depend>ament_cmake_pytest</test_depend>
