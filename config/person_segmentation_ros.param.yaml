@@ -3,5 +3,5 @@ input_image_height: 320
 input_image_width: 320
 model_dtype: "float32"
 mqtt_topic_name: "human-detected"
-image_topic_name: '/oak/color'
-stereo_topic_name: '/oak/stereo'
+image_topic_name: '/oak/rgb/image_raw'
+stereo_topic_name: '/oak/stereo/image_raw'

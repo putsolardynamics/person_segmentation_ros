@@ -39,16 +39,20 @@ class PersonSegmentationRos:
         input_data = self.preprocess(frame, dtype=self.dtype)
         outputs = self.session.run([self.output_name], {self.input_name: input_data})[0]
         predicted_mask = np.where(outputs < 0.5, 0, 255).astype(np.uint8)
-        return predicted_mask
+        return np.squeeze(predicted_mask)
     
     def sendMqttMessage(self, message: bool):
         self._client.publish(self.topic_name, payload=message, qos=0, retain=False)
     
     def processReceivedFrames(self, image: np.ndarray, stereo_image: np.ndarray):
        segmentation_mask = self.infer(image)
-       cv2.imshow('mask', segmentation_mask)
-       # TODO: implement logic
-       return
+       # Save results in local directory
+       cv2.imwrite('mask.jpg', segmentation_mask)
+       image = cv2.resize(image, (self.input_width, self.input_height))
+       cv2.imwrite('image.jpg', image)
+       stereo_image = cv2.resize(stereo_image, (self.input_width, self.input_height))
+       cv2.imwrite('stereo.jpg', stereo_image)
+       # TODO: implement logic here
 
     @staticmethod
     def preprocess(image: np.ndarray, dtype=np.float32):
