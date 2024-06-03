@@ -1,6 +1,6 @@
 distance_m: 5
-input_image_height: 320
-input_image_width: 320
+input_image_height: 640
+input_image_width: 640
 model_dtype: "float32"
 mqtt_topic_name: "human-detected"
 image_topic_name: '/oak/rgb/image_raw'
