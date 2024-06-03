@@ -1,4 +1,4 @@
-distance_m: 3
+distance_m: 5
 input_image_height: 320
 input_image_width: 320
 model_dtype: "float32"

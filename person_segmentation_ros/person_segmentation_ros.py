@@ -28,7 +28,18 @@ class PersonSegmentationRos:
         self.input_name = self.session.get_inputs()[0].name
         self.input_height, self.input_width = input_shape[2:]
         self.dtype = dtype
-        self.detection_distance = distance
+        self._uint16_max = 2**16 - 1
+        self._detection_state = False
+
+        self._min_camera_range = 0.7 # min range which is 0.0
+        self._max_camera_range = 12 # max range which would be equal to uint16 max
+
+        self.detection_distance = np.clip(
+           ((distance - self._min_camera_range) / self._max_camera_range) * self._uint16_max, 
+           10,
+           self._uint16_max)
+        
+        print(self.detection_distance, distance)
 
         self._client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
         self._client.connect('localhost', 1883, 60)
@@ -44,15 +55,33 @@ class PersonSegmentationRos:
     def sendMqttMessage(self, message: bool):
         self._client.publish(self.topic_name, payload=message, qos=0, retain=False)
     
-    def processReceivedFrames(self, image: np.ndarray, stereo_image: np.ndarray):
+    def processReceivedFrames(self, image: np.ndarray, stereo_image: np.ndarray) -> bool:
        segmentation_mask = self.infer(image)
-       # Save results in local directory
-       cv2.imwrite('mask.jpg', segmentation_mask)
+       segmentation_mask = cv2.erode(segmentation_mask, np.ones((5, 5)), iterations=5)
+       segmentation_mask = cv2.dilate(segmentation_mask, np.ones((3, 5)), iterations=5)
        image = cv2.resize(image, (self.input_width, self.input_height))
+       stereo_image = np.array(cv2.resize(stereo_image, (self.input_width, self.input_height)), dtype=np.uint16)
+       processed_img = self.stereoSegmentedFusion(mask=segmentation_mask, stereo=stereo_image)
+       # Save results in local directory
+       cv2.imwrite('mask_applied.jpg', processed_img)
+       cv2.imwrite('mask.jpg', segmentation_mask)
        cv2.imwrite('image.jpg', image)
-       stereo_image = cv2.resize(stereo_image, (self.input_width, self.input_height))
        cv2.imwrite('stereo.jpg', stereo_image)
-       # TODO: implement logic here
+       return self.detectionAction(processed_img)
+
+    def stereoSegmentedFusion(self, mask: np.ndarray, stereo: np.ndarray) -> np.ndarray:
+       stereo[mask<=0]=self._uint16_max
+       return np.array(stereo, dtype=np.uint16)
+    
+    def detectionAction(self, detection_img: np.ndarray) -> bool:
+       print(detection_img.min())
+       current_state = detection_img.min() < self.detection_distance
+       if (current_state == self._detection_state):
+          return False
+       
+       self.sendMqttMessage(str(current_state))
+       self._detection_state = current_state
+       return True
 
     @staticmethod
     def preprocess(image: np.ndarray, dtype=np.float32):
