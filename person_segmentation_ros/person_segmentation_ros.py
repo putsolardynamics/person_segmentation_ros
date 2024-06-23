@@ -47,7 +47,7 @@ class PersonSegmentationRos:
         
         print(self.detection_distance, distance)
 
-        self._client = mqtt.Client(self.get_subscriber_id(client_id, topic_name))
+        self._client = mqtt.Client(self.get_publisher_id(client_id, topic_name))
         self._client.connect(broker, port, 60)
         self.topic_name = topic_name
     
@@ -59,9 +59,9 @@ class PersonSegmentationRos:
         return np.squeeze(predicted_mask)
     
     @staticmethod
-    def get_subscriber_id(client_id: int, topic: str) -> str:
+    def get_publisher_id(client_id: int, topic: str) -> str:
         """Get specifically formatted client id"""
-        return f"subscriber-{topic}-{client_id}"
+        return f"publisher-{topic}-{client_id}"
     
     def sendMqttMessage(self, message: bool):
         self._client.publish(self.topic_name, payload=message, qos=0, retain=False)

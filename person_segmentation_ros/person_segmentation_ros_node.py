@@ -43,9 +43,11 @@ class PersonSegmentationRosNode(Node):
         model_dtype = str(self.declare_parameter('model_dtype', 'float32').value)
         onnx_model_path = str(self.declare_parameter('onnx_model_path', 'model.onnx').value)
         image_topic_name = str(self.declare_parameter('image_topic_name', '/oak/color').value)
-        client_id = int(self.declare_parameter('client_id', '2').value)
+        client_id = int(self.declare_parameter('client_id', '1').value)
         port = int(self.declare_parameter('port', '1883').value)
         broker = str(self.declare_parameter('broker', 'localhost').value)
+        stereo_topic_name = str(self.declare_parameter('stereo_topic_name', '/oak/stereo').value)
+
         self.person_segmentation_ros = PersonSegmentationRos(
             onnx_model_path,
             mqtt_topic_name,
@@ -71,8 +73,6 @@ class PersonSegmentationRosNode(Node):
         cv_stereo_image = self._bridge.imgmsg_to_cv2(stereo_img, '16UC1')
         if self.person_segmentation_ros.processReceivedFrames(cv_image, cv_stereo_image):
             self.get_logger().info("Message sent")
-
-
 
 
 def main(args=None):
