@@ -1,7 +1,7 @@
 distance_m: 5
 input_image_height: 640
 input_image_width: 640
-broker: "192.168.10.159"
+broker: "localhost"
 port: 1883
 client_id: 1
 model_dtype: "float32"
