@@ -43,12 +43,17 @@ class PersonSegmentationRosNode(Node):
         model_dtype = str(self.declare_parameter('model_dtype', 'float32').value)
         onnx_model_path = str(self.declare_parameter('onnx_model_path', 'model.onnx').value)
         image_topic_name = str(self.declare_parameter('image_topic_name', '/oak/color').value)
-        stereo_topic_name = str(self.declare_parameter('stereo_topic_name', '/oak/stereo').value)
+        client_id = int(self.declare_parameter('client_id', '2').value)
+        port = int(self.declare_parameter('port', '1883').value)
+        broker = str(self.declare_parameter('broker', 'localhost').value)
         self.person_segmentation_ros = PersonSegmentationRos(
             onnx_model_path,
             mqtt_topic_name,
             model_dtype,
             distance_m,
+            broker,
+            port,
+            client_id,
             )
         self.get_logger().info(f"onnx model path: {onnx_model_path}", once=True)
         self._bridge = cv_bridge.CvBridge()

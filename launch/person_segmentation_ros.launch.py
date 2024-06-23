@@ -35,7 +35,7 @@ def launch_setup(context, *args, **kwargs):
     onnx_model = LaunchConfiguration('onnx_model_path').perform(context)
     if not onnx_model:
         onnx_model = PathJoinSubstitution(
-            [FindPackageShare('person_segmentation_ros'), 'resources', 'model_fp32.onnx']
+            [FindPackageShare('person_segmentation_ros'), 'resources', 'segmentation_model_fp32.onnx']
         ).perform(context)
 
     param_yaml['onnx_model_path'] = onnx_model
